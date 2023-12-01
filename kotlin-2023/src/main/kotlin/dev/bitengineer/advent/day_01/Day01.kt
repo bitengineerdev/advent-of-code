@@ -32,33 +32,6 @@ private fun String.calibrationValueByDigit(): Int {
     return formNumber(firstDigit, lastDigit)
 }
 
-private fun String.calibrationValueByWordOrNumber(): Int {
-    val firstDigit = findNumber(0, reversed = false) ?: error("No first digit found in $this")
-    val lastDigit = reversed().findNumber(0, reversed = true) ?: error("No last digit found in $this")
-
-    return formNumber(firstDigit, lastDigit)
-}
-
-private fun formNumber(first: Int, second: Int): Int = (first * 10) + second
-
-private fun String.findNumber(startPos: Int, reversed: Boolean): Int? {
-    if (this[startPos].isDigit()) return this[startPos].toString().toInt()
-
-    this.substring(startPos).let { subWord ->
-        subWord.forEachIndexed { index, c ->
-            if (c.isDigit()) return@forEachIndexed
-            val wordNumber = subWord.substring(0, index + 1)
-                .let { if (reversed) it.reversed() else it }
-                .let { numberWords[it] }
-            if (wordNumber != null) {
-                return wordNumber
-            }
-        }
-    }
-
-    return this.findNumber(startPos + 1, reversed)
-}
-
 private val numberWords = mapOf(
     "one" to 1,
     "two" to 2,
@@ -70,3 +43,38 @@ private val numberWords = mapOf(
     "eight" to 8,
     "nine" to 9
 )
+
+private val maxNumberWordLength: Int = numberWords.keys.maxOf { it.length }
+private val numberWordStartingLettings: Set<Char> = numberWords.keys.map { it.first() }.toSet()
+
+private fun String.calibrationValueByWordOrNumber(): Int {
+    val firstDigit = findNumber(reversed = false) ?: error("No first digit found in $this")
+    val lastDigit = reversed().findNumber(reversed = true) ?: error("No last digit found in $this")
+
+    return formNumber(firstDigit, lastDigit)
+}
+
+private fun formNumber(first: Int, second: Int): Int = (first * 10) + second
+
+private fun String.findNumber(reversed: Boolean): Int? {
+    val startChar = this.first()
+    if (startChar.isDigit()) return startChar.digitToInt()
+
+    if (startChar in numberWordStartingLettings) {
+        forEachIndexed { index, c ->
+            if (c.isDigit() || index > maxNumberWordLength) return@forEachIndexed
+            val wordNumber = substring(0, index + 1)
+                .let { if (reversed) it.reversed() else it }
+                .let { numberWords[it] }
+            if (wordNumber != null) {
+                return wordNumber
+            }
+        }
+    }
+
+    return substring(1).findNumber(reversed)
+}
+
+/*
+ * Another solution is to use a sequence of digits and then check if the substring starts with a number word.
+ */
