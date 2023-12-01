@@ -1,0 +1,5 @@
+# Gradle output
+.gradle
+out
+target
+build
