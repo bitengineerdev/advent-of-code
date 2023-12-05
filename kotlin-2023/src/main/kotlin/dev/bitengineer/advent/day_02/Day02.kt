@@ -3,7 +3,6 @@ package dev.bitengineer.advent.day_02
 import dev.bitengineer.advent.util.assertEquals
 import dev.bitengineer.advent.util.input
 import dev.bitengineer.advent.util.part1TestFile
-import dev.bitengineer.advent.util.part2TestFile
 
 fun main() {
     val day = "02"
