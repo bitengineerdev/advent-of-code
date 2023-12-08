@@ -35,24 +35,29 @@ private fun LongRange.findLocation(categoryMappers: List<CategoryMapper>): List<
         }
     }
 
-private fun LongRange.mapTo(rangeMapper: RangeMapper): LongRange? {
-    return if (rangeMapper.range.first >= this.first && rangeMapper.range.last <= this.last) {
-        // applied range mapper is fully contained in the source range
-        rangeMapper.range.shift(rangeMapper.mappedValue)
-    } else if (this.first >= rangeMapper.range.first && this.last <= rangeMapper.range.last) {
-        // applied range mapper fully contains other range mapper
-        this.shift(rangeMapper.mappedValue)
-    } else if (rangeMapper.range.first < this.last && rangeMapper.range.last > this.last) {
-        // applied range mapper overlaps on the left side
-        (rangeMapper.range.first..this.last).shift(rangeMapper.mappedValue)
-    } else if (rangeMapper.range.first < this.first && rangeMapper.range.last > this.first) {
-        // applied range mapper overlaps on the right side
-        (this.first..rangeMapper.range.last).shift(rangeMapper.mappedValue)
-    } else {
-        // applied range mapper is completely outside of the source range
-        null
+private fun LongRange.mapTo(rangeMapper: RangeMapper): LongRange? =
+    when {
+        rangeMapper.range.first >= this.first && rangeMapper.range.last <= this.last -> {
+            // applied range mapper is fully contained in the source range
+            rangeMapper.range.shift(rangeMapper.mappedValue)
+        }
+        this.first >= rangeMapper.range.first && this.last <= rangeMapper.range.last -> {
+            // applied range mapper fully contains other range mapper
+            this.shift(rangeMapper.mappedValue)
+        }
+        rangeMapper.range.first < this.last && rangeMapper.range.last > this.last -> {
+            // applied range mapper overlaps on the left side
+            (rangeMapper.range.first..this.last).shift(rangeMapper.mappedValue)
+        }
+        rangeMapper.range.first < this.first && rangeMapper.range.last > this.first -> {
+            // applied range mapper overlaps on the right side
+            (this.first..rangeMapper.range.last).shift(rangeMapper.mappedValue)
+        }
+        else -> {
+            // applied range mapper is completely outside the source range
+            null
+        }
     }
-}
 
 private fun LongRange.shift(shift: Long): LongRange = (this.first + shift)..(this.last + shift)
 
